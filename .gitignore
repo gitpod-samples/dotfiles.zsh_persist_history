@@ -1,0 +1,43 @@
+# This is Git's per-user configuration file.
+[user]
+    name = Miki Ashkenazi
+    email = miki.ashkenazi@hibob.io
+[push]
+    default = current
+[fetch]
+    prune = true
+[alias]
+    pl = pull --rebase
+    st = status
+    br = branch
+    co = checkout
+    ld = log --pretty=format:'%C(auto)%h %C(magenta)%cr %C(cyan)%an %C(auto)%d%C(reset) %s' --graph
+    pf = push --force-with-lease
+    pu = push -u
+    cb = rev-parse --abbrev-ref HEAD
+    cp = cherry-pick -x
+    pop = stash pop
+    discard-changes-at = "!f() { if [ $(git cb) == $1 ] ; then git reset --hard origin/$1; else git br -f $1 origin/$1; fi; }; f"
+    discard-changes = "!git discard-changes-at $(git cb)"
+    force-sync-of = "!f() { git fetch; git discard-changes-at $1; }; f"
+    discard-changes-and-update = "!git force-sync-of $(git cb)"
+    force-sync-and-checkout = "!f() { git force-sync-of $1; git co $2; }; f"
+    start-branch = "!f() { git force-sync-and-checkout $1; git co -b $2; git push -u; }; f"
+    backup-current-branch = push -f
+    sync-rebase = "!f() { git force-sync-of $1; git rebase $1; }; f"
+    sync-final-rebase = "!f() { CB=$(git cb); git sync-rebase $1; git co $1; git br -d $CB; }; f"
+    retrigger = "!f() { git push origin :$(git cb) && git push -u; }; f"
+    srm = "!f() { git sync-rebase master; }; f"
+    ssrm = "!f() { git stash; git srm; git stash pop; }; f"
+    rim = rebase -i master
+    amend = "!f() { git commit --amend --no-edit; }; f"
+[filter "lfs"]
+    required = true
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+[pull]
+    rebase = true
+
+[core]
+	editor = code --wait
